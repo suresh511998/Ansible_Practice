@@ -1,62 +1,46 @@
 - hosts: jenkinsserver
   become: true
   tasks:
-    - name: Enable EPEL & Extras Repositories
-      command: amazon-linux-extras enable java-openjdk11
-      ignore_errors: yes
-
-    - name: Install openJDK 11
+    - name: Enable EPEL for Amazon Linux
       yum:
-        name:
-          - java-11-openjdk
-          - java-11-openjdk-devel
+        name: epel-release
         state: present
-      ignore_errors: yes
+
+    - name: Install openJDK 11 (Amazon Linux version)
+      yum:
+        name: java-11-amazon-corretto
+        state: present
 
     - name: Download Jenkins repo
       get_url:
         url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
         dest: /etc/yum.repos.d/jenkins.repo
 
-    - name: Import Jenkins RPM key
+    - name: Import Jenkins GPG key
       rpm_key:
         state: present
         key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-
-    - name: Install EPEL release
-      yum:
-        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-        state: present
-        disable_gpg_check: true
 
     - name: Install Jenkins
       yum:
         name: jenkins
         state: present
 
-    - name: Set correct permissions for Jenkins
-      file:
-        path: /var/lib/jenkins
-        state: directory
-        owner: jenkins
-        group: jenkins
-        mode: '0755'
-
     - name: Start Jenkins
       systemd:
         name: jenkins
         state: started
-        enabled: yes
+        enabled: true
 
-    - name: Sleep 30 seconds or wait for port 8080 for Jenkins
+    - name: Wait for Jenkins to be ready
       wait_for:
-        delay: 30
         port: 8080
+        delay: 30
 
-    - name: Get initial admin password
+    - name: Get Jenkins initial admin password
       shell: cat /var/lib/jenkins/secrets/initialAdminPassword
-      register: jenkinspass
+      register: jenkins_password
 
-    - name: Print Jenkins password
+    - name: Display Jenkins password
       debug:
-        var: jenkinspass.stdout
+        var: jenkins_password.stdout
