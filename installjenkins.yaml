@@ -27,7 +27,7 @@
         name: jenkins
         state: started
     - name: enabled jenkins on the bootstarp
-      stystemd:
+      systemd:
         name: jenkins
         enabled: true
     - name: sleep 30 seconds or wait for port 8080 for jenkins
