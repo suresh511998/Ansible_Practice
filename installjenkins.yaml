@@ -34,10 +34,12 @@
       wait_for:
         delay: 30
         port: 8080
-    - name: Get init admin password
-      shell: cat /var/lib/jenkins/secrets/intialAdminPassword
+    - name: Get Initial Admin Password
+      shell: cat /var/lib/jenkins/secrets/initialAdminPassword
       register: jenkinspass
-    - name: print jenikns password
+      changed_when: false
+
+    - name: Print Jenkins Admin Password
       debug:
-        var: jenkinspass.stdout 
-        #
+        var: jenkinspass.stdout
+        
