@@ -40,3 +40,4 @@
     - name: print jenikns password
       debug:
         var: jenkinspass.stdout 
+        #
