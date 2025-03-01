@@ -1,4 +1,4 @@
-- hosts: jenkinsserver
+- hosts: appservers
   become: true
   tasks:
     - name: Install openJdk
