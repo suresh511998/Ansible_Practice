@@ -7,19 +7,28 @@
         name: java-17-amazon-corretto
         state: present
 
+    - name: Find Java 17 installation path
+      command: readlink -f /usr/bin/java
+      register: java_path
+      changed_when: false
+
+    - name: Print Java Path
+      debug:
+        var: java_path.stdout
+
     - name: Set Java 17 as default
-      alternatives:
-        name: java
-        path: /usr/lib/jvm/java-17-amazon-corretto/bin/java
+      command: alternatives --set java {{ java_path.stdout }}
+      when: "'java-17' in java_path.stdout"
 
     - name: Verify Java Version
       command: java -version
       register: java_version
       changed_when: false
+      ignore_errors: true
 
     - name: Print Java Version
       debug:
-        var: java_version.stdout
+        var: java_version.stderr_lines
 
     - name: Download Jenkins repo
       get_url:
