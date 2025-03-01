@@ -1,0 +1,15 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: add group "ansible"
+      group:
+        name: ansible
+        state: present
+  tasks:
+    - name: add user "suresh" with specific UID and primary group of admin
+      user:
+        name: ansible
+        comment: suresh
+        uid: 1041
+        group: ansible
+        state: present

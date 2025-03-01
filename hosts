@@ -1,0 +1,74 @@
+# This is the Ansible inventory file.
+# It defines groups of hosts and their connection details.
+
+# ------------------------------------------------------------------------------
+# BASIC HOST GROUPS
+# ------------------------------------------------------------------------------
+[appservers]
+172.31.85.73 ansible_user=ec2-user ansible_ssh_private_key_file=~/ansible.pem
+[jenkinsserver]
+172.31.84.22 ansible_user=ec2-user ansible_ssh_private_key_file=~/ansible.pem
+[webservers]
+172.31.90.82 ansible_user=ec2-user ansible_ssh_private_key_file=~/ansible.pem
+
+# Define a group of web servers
+[webservers]
+#192.168.1.10  # First web server
+#192.168.1.11  # Second web server
+
+# Define a group of database servers
+[dbservers]
+#db.example.com  # Database server using DNS hostname
+
+# ------------------------------------------------------------------------------
+# HOST VARIABLES
+# ------------------------------------------------------------------------------
+
+# You can define variables for specific hosts.
+# Example: Load balancer with custom SSH user and private key
+#[loadbalancer]
+#lb.example.com ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+# ------------------------------------------------------------------------------
+# LOCALHOST CONFIGURATION
+# ------------------------------------------------------------------------------
+
+# If you want to run Ansible on the local machine, use the `local` connection
+#[localhost]
+#127.0.0.1 ansible_connection=local
+
+# ------------------------------------------------------------------------------
+# ADVANCED CONFIGURATION
+# ------------------------------------------------------------------------------
+
+# You can define a group inside another group
+[all_servers:children]
+#webservers
+#dbservers
+#loadbalancer
+
+# ------------------------------------------------------------------------------
+# INDIVIDUAL HOST SETTINGS
+# ------------------------------------------------------------------------------
+
+# You can specify different SSH ports for specific hosts
+[custom_ssh]
+#server1.example.com ansible_port=2222
+#server2.example.com ansible_port=2200
+
+# ------------------------------------------------------------------------------
+# DEFAULT SETTINGS
+# ------------------------------------------------------------------------------
+
+# If a host requires a password instead of an SSH key, define it here
+[password_hosts]
+host1.example.com ansible_ssh_user=root ansible_ssh_pass=yourpassword
+
+# ------------------------------------------------------------------------------
+# WINRM CONFIGURATION (FOR WINDOWS SERVERS)
+# ------------------------------------------------------------------------------
+
+# If managing Windows servers, define them with WinRM connection
+#[windows]
+#winserver.example.com ansible_user=Administrator ansible_password=YourPass123 ansible_connection=winrm ansible_winrm_transport=basic ansible_winrm_server_cert_validation=ignore
+

@@ -1,0 +1,7 @@
+- hosts: all
+  become: yes  # Run as root
+  tasks:
+    - name: Ensure the group "ansible" exists
+      group:
+        name: ansible
+        state: present  # Creates the group if it doesn't exist
