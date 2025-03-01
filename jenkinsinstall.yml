@@ -1,13 +1,8 @@
 - hosts: jenkinsserver
   become: true
   tasks:
-    - name: Enable EPEL for Amazon Linux
-      yum:
-        name: epel-release
-        state: present
-
-    - name: Install openJDK 11 (Amazon Linux version)
-      yum:
+    - name: Install Amazon Corretto JDK 11 (Java 11)
+      dnf:
         name: java-11-amazon-corretto
         state: present
 
@@ -22,17 +17,17 @@
         key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 
     - name: Install Jenkins
-      yum:
+      dnf:
         name: jenkins
         state: present
 
-    - name: Start Jenkins
+    - name: Start and enable Jenkins
       systemd:
         name: jenkins
         state: started
         enabled: true
 
-    - name: Wait for Jenkins to be ready
+    - name: Wait for Jenkins port 8080
       wait_for:
         port: 8080
         delay: 30
