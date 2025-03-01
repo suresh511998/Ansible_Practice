@@ -3,7 +3,7 @@
   tasks:
     - name: Install openJdk
       yum:
-        name: java-17-openjdk
+        name: java-11-openjdk-devel
         state: present
     - name: Download jenkins repo
       get_url:
