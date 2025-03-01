@@ -1,16 +1,25 @@
 - hosts: jenkinsserver
   become: true
   tasks:
-    - name: Install Amazon Corretto OpenJDK 11
+
+    - name: Install Amazon Corretto 17
       yum:
-        name: java-11-amazon-corretto
+        name: java-17-amazon-corretto
         state: present
 
-    - name: Set JAVA_HOME environment variable
-      lineinfile:
-        path: /etc/sysconfig/jenkins
-        line: 'JAVA_HOME=/usr/lib/jvm/java-11-amazon-corretto'
-        create: yes
+    - name: Set Java 17 as default
+      alternatives:
+        name: java
+        path: /usr/lib/jvm/java-17-amazon-corretto/bin/java
+
+    - name: Verify Java Version
+      command: java -version
+      register: java_version
+      changed_when: false
+
+    - name: Print Java Version
+      debug:
+        var: java_version.stdout
 
     - name: Download Jenkins repo
       get_url:
@@ -27,32 +36,26 @@
         name: jenkins
         state: present
 
-    - name: Ensure Jenkins directories have correct permissions
-      file:
-        path: "{{ item }}"
-        owner: jenkins
-        group: jenkins
-        recurse: yes
-      loop:
-        - /var/lib/jenkins
-        - /var/log/jenkins
-        - /var/cache/jenkins
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: true
 
-    - name: Start and enable Jenkins service
+    - name: Start Jenkins
       systemd:
         name: jenkins
         state: started
         enabled: true
 
-    - name: Wait for Jenkins to be available
+    - name: Wait for Jenkins to start
       wait_for:
         port: 8080
         delay: 30
 
-    - name: Get initial admin password
+    - name: Get Initial Admin Password
       shell: cat /var/lib/jenkins/secrets/initialAdminPassword
       register: jenkinspass
+      changed_when: false
 
-    - name: Print Jenkins initial admin password
+    - name: Print Jenkins Admin Password
       debug:
         var: jenkinspass.stdout
