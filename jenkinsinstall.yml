@@ -1,41 +1,58 @@
 - hosts: jenkinsserver
   become: true
   tasks:
-    - name: Install Amazon Corretto JDK 11 (Java 11)
-      dnf:
+    - name: Install Amazon Corretto OpenJDK 11
+      yum:
         name: java-11-amazon-corretto
         state: present
+
+    - name: Set JAVA_HOME environment variable
+      lineinfile:
+        path: /etc/sysconfig/jenkins
+        line: 'JAVA_HOME=/usr/lib/jvm/java-11-amazon-corretto'
+        create: yes
 
     - name: Download Jenkins repo
       get_url:
         url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
         dest: /etc/yum.repos.d/jenkins.repo
 
-    - name: Import Jenkins GPG key
+    - name: Import Jenkins RPM key
       rpm_key:
         state: present
         key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 
     - name: Install Jenkins
-      dnf:
+      yum:
         name: jenkins
         state: present
 
-    - name: Start and enable Jenkins
+    - name: Ensure Jenkins directories have correct permissions
+      file:
+        path: "{{ item }}"
+        owner: jenkins
+        group: jenkins
+        recurse: yes
+      loop:
+        - /var/lib/jenkins
+        - /var/log/jenkins
+        - /var/cache/jenkins
+
+    - name: Start and enable Jenkins service
       systemd:
         name: jenkins
         state: started
         enabled: true
 
-    - name: Wait for Jenkins port 8080
+    - name: Wait for Jenkins to be available
       wait_for:
         port: 8080
         delay: 30
 
-    - name: Get Jenkins initial admin password
+    - name: Get initial admin password
       shell: cat /var/lib/jenkins/secrets/initialAdminPassword
-      register: jenkins_password
+      register: jenkinspass
 
-    - name: Display Jenkins password
+    - name: Print Jenkins initial admin password
       debug:
-        var: jenkins_password.stdout
+        var: jenkinspass.stdout
